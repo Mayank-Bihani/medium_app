@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_04_085108) do
-  create_table "comments_tables", force: :cascade do |t|
+ActiveRecord::Schema[7.0].define(version: 2023_08_04_190431) do
+  create_table "comments", force: :cascade do |t|
     t.integer "post_id"
     t.integer "user_id"
     t.text "comment_text"
@@ -19,14 +19,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_085108) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "follows_tables", force: :cascade do |t|
+  create_table "follows", force: :cascade do |t|
     t.integer "follower_id"
     t.integer "following_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "likes_tables", force: :cascade do |t|
+  create_table "likes", force: :cascade do |t|
     t.integer "user_id"
     t.integer "post_id"
     t.datetime "created_at", null: false
@@ -35,17 +35,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_085108) do
 
   create_table "posts", force: :cascade do |t|
     t.string "title"
-    t.string "topic"
     t.text "post_text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.string "post_photo"
+    t.integer "topics_id"
+    t.index ["topics_id"], name: "index_posts_on_topics_id"
   end
 
-  create_table "topics_tables", force: :cascade do |t|
+  create_table "topics", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "topic_name"
   end
 
   create_table "users", force: :cascade do |t|
@@ -59,4 +61,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_085108) do
     t.string "password_digest"
   end
 
+  create_table "views", force: :cascade do |t|
+    t.integer "post_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "posts", "topics", column: "topics_id"
 end

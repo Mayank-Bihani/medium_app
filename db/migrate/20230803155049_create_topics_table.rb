@@ -4,6 +4,6 @@ class CreateTopicsTable < ActiveRecord::Migration[7.0]
       t.string :topic_name
       t.timestamps
     end
-    delete_column :posts, :topic
+    # delete_column :posts, :topic
   end
 end

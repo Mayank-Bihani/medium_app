@@ -1,12 +1,31 @@
 class PostsController < ApplicationController
-    def show
+  before_action :authenticate_user, except: [:show, :index]
+  
+  
+  def show
         # byebug
         @post= Post.find(params[:id])
-        render json:@post
+        views_count = @post.views.count
+        likes_count = @post.likes.count
+        comments = @post.comments.includes(:user)
+        if current_user
+          user_liked = current_user.likes.find_by(post: @post).present?
+          user_viewed = current_user.views.exists?(post_id: post_id)
+        else
+          user_liked=false
+          user_viewed=false
+        end
+
+          render json:{post: @post ,likes_count: likes_count, comments: comments, views_count: views_count, user_liked: user_liked, user_viewed: user_viewed}#, methods: [:likes_count]
     end
+
     def index
         @posts=Post.all
-        render json:@posts
+        render json: @posts,  methods: [:likes_count]
+    end
+
+    def likes_count
+      @likes.count
     end
 
     def posts_by_user
@@ -15,7 +34,7 @@ class PostsController < ApplicationController
         # Rails.logger.info("Received user_username: #{user_username}")
 
         @user = User.find_by(username: user_username)
-        render json: @user
+        # render json: @user
         if @user
           @posts = @user.posts
           render json: @posts
@@ -27,10 +46,57 @@ class PostsController < ApplicationController
       def posts_by_date
         start_date = Date.parse(params[:start_date])
         end_date = Date.parse(params[:end_date])
-        @posts = Post.where(post_time: start_date..end_date)
+        Rails.logger.info("Received start_date: #{start_date} & end_date: #{end_date}" )
+        @posts = Post.where(created_at: start_date.beginning_of_day..end_date.end_of_day)
+
         render json: @posts
       end
 
+
+      def create
+        topic_name = params[:topic_name]
+         
+        # puts "Topic Name: #{topic_name}"
+        @post = current_user.posts.build(post_params)
+        # @post.topics_id = topic.id 
+        topic = Topic.find_or_create_by(topic_name: topic_name)
+        # puts "Created Topic: #{topic.inspect}"
+
+        @post.topic=topic
+        if @post.save
+          
+          # @post.update(topic: topic)
+          render json: @post, status: :created
+        else
+          render json: { errors: @post.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+    
+      def update
+        @post = current_user.posts.find(params[:id])
+    
+        if @post.update(post_partial_params)
+          render json: @post
+        else
+          render json: { error: @post.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+    
+      def destroy
+        @post = current_user.posts.find(params[:id])
+        @post.destroy
+        head :no_content
+      end
+    
+      private
+    
+      def post_params
+        params.require(:post).permit(:title, :topic, :post_text, :views)
+      end
+
+      def post_partial_params
+        params.require(:post).permit(:title, :topic, :text)
+      end
     # def new
 
     # end
