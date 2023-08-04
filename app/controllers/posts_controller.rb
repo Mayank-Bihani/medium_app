@@ -21,7 +21,7 @@ class PostsController < ApplicationController
 
     def index
         @posts=Post.all
-        render json: @posts,  methods: [:likes_count]
+        render json: @posts
     end
 
     def likes_count

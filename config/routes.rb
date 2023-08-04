@@ -25,4 +25,6 @@ Rails.application.routes.draw do
     resource :views, only: [:create]
   end
   get '/topics', to: 'topics#index'
+
+  post '/subscriptions', to: 'subscriptions#create'
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_04_190431) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_04_221231) do
   create_table "comments", force: :cascade do |t|
     t.integer "post_id"
     t.integer "user_id"
@@ -59,6 +59,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_190431) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "password_digest"
+    t.string "stripe_customer_id"
   end
 
   create_table "views", force: :cascade do |t|
