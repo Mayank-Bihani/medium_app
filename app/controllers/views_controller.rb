@@ -6,14 +6,6 @@ class ViewsController < ApplicationController
       @post = Post.find(params[:post_id])
       @view = View.new(user: current_user, post: @post)
 
-      # if !user_already_viewed?
-      #   # Increment views count
-      #   @post.increment!(:views)
-  
-      #   # Record the view
-      #   View.create(user: current_user, post: @post)
-      # end
-
       if @view.save
         render json: { message: 'View recorded successfully' }, status: :created
       else

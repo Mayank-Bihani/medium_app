@@ -20,12 +20,6 @@ Rails.application.routes.draw do
 
   get '/saves', to: 'saves#index'
   delete '/saves/:id', to: 'saves#destroy'
-  # resources :posts do
-  #   collection do
-  #     get :my_posts
-  #   end
-  # end
-  # resources :posts
 
   
   resources :profiles
