@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :posts do
     collection do
       get :drafts
+      get :my_posts
     end
   end
 
@@ -19,8 +20,14 @@ Rails.application.routes.draw do
 
   get '/saves', to: 'saves#index'
   delete '/saves/:id', to: 'saves#destroy'
+  # resources :posts do
+  #   collection do
+  #     get :my_posts
+  #   end
+  # end
+  # resources :posts
+
   
-  resources :posts
   resources :profiles
   get '/posts/by_user/:user_username', to: 'posts#posts_by_user'
   
@@ -40,7 +47,7 @@ Rails.application.routes.draw do
   resources :posts do
     resource :views, only: [:create]
   end
-  
+
   get '/topics', to: 'topics#index'
 
   post '/subscriptions', to: 'subscriptions#create'

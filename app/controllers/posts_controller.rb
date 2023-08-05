@@ -24,6 +24,22 @@ class PostsController < ApplicationController
       render json: @drafts
     end
 
+    def my_posts
+      @my_posts = current_user.posts.where(draft:false)
+      posts_with_counts = @my_posts.map do |post|
+        {
+          post: post,
+          view_count: post.views.count,
+          likes_count: post.likes.count,
+          comments_count: post.comments.count
+        }
+      end
+    
+      render json: {
+        posts: posts_with_counts
+      }, status: :ok
+    end
+
     def index
         @posts=Post.where(draft: false).all
         @posts = @posts.map { |post| post.as_json.merge(reading_time: calculate_reading_time(post)) }
@@ -44,6 +60,10 @@ class PostsController < ApplicationController
 
     def likes_count
       @likes.count
+    end
+
+    def comments_count
+      @comments.count
     end
 
     def posts_by_user
@@ -73,8 +93,6 @@ class PostsController < ApplicationController
 
       def create
         topic_name = params[:topic_name]
-         
-        # puts "Topic Name: #{topic_name}"
         @post = current_user.posts.build(post_params)
         @post.draft = params[:draft] || false
         # @post.topics_id = topic.id 
@@ -96,7 +114,7 @@ class PostsController < ApplicationController
         @post = current_user.posts.find(params[:id])
     
         if @post.update(post_partial_params)
-          @post.update(draft: params[:draft])
+          @post.update(draft: params[:draft] || false)
           render json: @post
         else
           render json: { error: @post.errors.full_messages }, status: :unprocessable_entity
@@ -127,38 +145,4 @@ class PostsController < ApplicationController
       def post_partial_params
         params.require(:post).permit(:title, :topic, :text, :drafts)
       end
-    # def new
-
-    # end
-
-    # def create
-    #     @post=Post.new(params.require(:post).permit(:title, :topic, :post_text))
-    #     @post.save
-    #     redirect_to @post
-    # end
-    # def edit
-    #     @post = Post.find(params[:id])
-    # end
-    # def create 
-    #     @post=Post.new(params.require(:post).permit(:title, :topic, :post_text))
-    #     if @post.save
-    #     end
-    # end
-
-    # def update
-    #     @post=Post.find(params[:id])
-    #     if @post.update(params.require(:post).permit(:title, :topic, :post_text))
-    #         flash[:notice]= "Post was updated successfully ."
-    #         redirect_to @post
-    #     else
-    #         render 'edit'
-    #     end
-    # end
-    
-    # def destroy
-    #     @post = Post.find(params[:id])
-    #     @post.destroy
-    #     redirect_to posts_path
-    # end
-    
 end
