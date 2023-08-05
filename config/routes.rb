@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   end
 
   post '/drafts', to: 'posts#create'
+  
   resources :posts do
     resources :saves, only: [:create]
   end

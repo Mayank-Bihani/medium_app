@@ -16,7 +16,7 @@ class PostsController < ApplicationController
           user_viewed=false
         end
 
-          render json:{post: @post ,likes_count: likes_count, comments: comments, views_count: views_count, user_liked: user_liked, user_viewed: user_viewed}#, methods: [:likes_count]
+          render json:{post: @post ,likes_count: likes_count, comments: comments, views_count: views_count, user_liked: user_liked, user_viewed: user_viewed, reading_time: calculate_reading_time(@post)}
     end
 
     def drafts
@@ -31,7 +31,8 @@ class PostsController < ApplicationController
           post: post,
           view_count: post.views.count,
           likes_count: post.likes.count,
-          comments_count: post.comments.count
+          comments_count: post.comments.count,
+          reading_time: calculate_reading_time(post)
         }
       end
     
@@ -75,6 +76,7 @@ class PostsController < ApplicationController
         # render json: @user
         if @user
           @posts = @user.posts
+          @posts = @posts.map { |post| post.as_json.merge(reading_time: calculate_reading_time(post)) }
           render json: @posts
         else
           render json: { error: 'User not found' }, status: :not_found
@@ -86,7 +88,7 @@ class PostsController < ApplicationController
         end_date = Date.parse(params[:end_date])
         Rails.logger.info("Received start_date: #{start_date} & end_date: #{end_date}" )
         @posts = Post.where(created_at: start_date.beginning_of_day..end_date.end_of_day)
-
+        @posts = @posts.map { |post| post.as_json.merge(reading_time: calculate_reading_time(post)) }
         render json: @posts
       end
 
