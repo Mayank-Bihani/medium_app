@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_04_221231) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_05_090411) do
   create_table "comments", force: :cascade do |t|
     t.integer "post_id"
     t.integer "user_id"
@@ -41,7 +41,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_221231) do
     t.integer "user_id"
     t.string "post_photo"
     t.integer "topics_id"
+    t.boolean "draft"
     t.index ["topics_id"], name: "index_posts_on_topics_id"
+  end
+
+  create_table "saves", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "post_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_saves_on_post_id"
+    t.index ["user_id"], name: "index_saves_on_user_id"
   end
 
   create_table "topics", force: :cascade do |t|
@@ -70,4 +80,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_221231) do
   end
 
   add_foreign_key "posts", "topics", column: "topics_id"
+  add_foreign_key "saves", "posts"
+  add_foreign_key "saves", "users"
 end

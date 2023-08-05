@@ -1,12 +1,28 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  get '/posts/by_date', to: 'posts#posts_by_date' 
+  resources :posts do
+    collection do
+      get :drafts
+    end
+  end
 
-  # Defines the root path route ("/")
-  # root "articles#index"
-  get '/posts/by_date', to: 'posts#posts_by_date' #, as: 'posts_by_date'
+  resources :posts do
+    member do
+      put :publish
+    end
+  end
+
+  post '/drafts', to: 'posts#create'
+  resources :posts do
+    resources :saves, only: [:create]
+  end
+
+  get '/saves', to: 'saves#index'
+  delete '/saves/:id', to: 'saves#destroy'
+  
   resources :posts
-  resources :profile
-  get '/posts/by_user/:user_username', to: 'posts#posts_by_user' #, as: 'posts_by_userar'
+  resources :profiles
+  get '/posts/by_user/:user_username', to: 'posts#posts_by_user'
   
   resources :add_post, only: [:create]
   post '/register', to: 'registrations#create'
@@ -16,14 +32,15 @@ Rails.application.routes.draw do
   resources :posts, only: [:index, :show] do
     resources :likes, only: [:create, :destroy]
   end
+
   resources :comments, only: [:create, :destroy]
 
-  post 'follows', to: 'follows#create'
-  delete 'follows/:id', to: 'follows#destroy'
+  resources :follows, only: [:create, :destroy]
 
   resources :posts do
     resource :views, only: [:create]
   end
+  
   get '/topics', to: 'topics#index'
 
   post '/subscriptions', to: 'subscriptions#create'

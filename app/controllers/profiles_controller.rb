@@ -14,7 +14,7 @@ class ProfilesController < ApplicationController
     
       def update
         @user = User.find(params[:id])
-        if @user.update(profile_params)
+        if @user.update(profile_update_params)
           render json: @user, status: :ok
         else
           render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
@@ -24,6 +24,9 @@ class ProfilesController < ApplicationController
       private
     
       def profile_params
+        params.require(:user).permit(:name, :username, :email, :bio, :photo)
+      end
+      def profile_update_params
         params.require(:user).permit(:name, :username, :email, :bio, :photo)
       end
 end

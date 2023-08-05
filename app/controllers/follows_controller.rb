@@ -2,8 +2,8 @@ class FollowsController < ApplicationController
     before_action :authenticate_user
 
   def create
-    followeing_user = User.find(params[:following_id])
-    follow = current_user.following_users.build(following: following_user)
+    following_user = User.find(params[:following_id])
+    follow = current_user.follows.build(following: following_user)
 
     if follow.save
       render json: { message: 'User followed successfully' }, status: :created
@@ -13,7 +13,7 @@ class FollowsController < ApplicationController
   end
 
   def destroy
-    follow = current_user.following_users.find_by(following_id: params[:id])
+    follow = current_user.follows.find_by(following_id: params[:id])
     if follow
       follow.destroy
       head :no_content

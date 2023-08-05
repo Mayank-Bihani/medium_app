@@ -11,10 +11,10 @@ class User <ApplicationRecord
     has_many :comments
     has_many :views
 
-    has_many :follower_relationships, class_name: 'Follow', foreign_key: 'following_id'
-    has_many :followers, through: :follower_relationships, source: :follower
-  
-     has_many :following_relationships, class_name: 'Follow', foreign_key: 'follower_id'
-    has_many :following, through: :following_relationships, source: :following
+    has_many :follows, foreign_key: :follower_id, dependent: :destroy
+    has_many :following_users, through: :follows, source: :following
+
+    has_many :saves, class_name: 'Save', dependent: :destroy
+    has_many :saved_posts, through: :saves, source: :post
 
 end

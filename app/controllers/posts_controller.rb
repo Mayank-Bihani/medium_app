@@ -4,7 +4,7 @@ class PostsController < ApplicationController
   
   def show
         # byebug
-        @post= Post.find(params[:id])
+        @post= Post.where(draft: false).find(params[:id])
         views_count = @post.views.count
         likes_count = @post.likes.count
         comments = @post.comments.includes(:user)
@@ -19,9 +19,25 @@ class PostsController < ApplicationController
           render json:{post: @post ,likes_count: likes_count, comments: comments, views_count: views_count, user_liked: user_liked, user_viewed: user_viewed}#, methods: [:likes_count]
     end
 
+    def drafts
+      @drafts = current_user.posts.where(draft: true)
+      render json: @drafts
+    end
+
     def index
-        @posts=Post.all
+        @posts=Post.where(draft: false).all
+        @posts = @posts.map { |post| post.as_json.merge(reading_time: calculate_reading_time(post)) }
         render json: @posts
+    end
+
+    def calculate_reading_time(post)
+      content= post.post_text
+      if content.present?
+        word_count = post.post_text.split.size
+        wpm = 200 # average reading speed
+        minutes = (word_count / wpm).ceil
+        minutes
+      end
     end
 
     def likes_count
@@ -58,6 +74,7 @@ class PostsController < ApplicationController
          
         # puts "Topic Name: #{topic_name}"
         @post = current_user.posts.build(post_params)
+        @post.draft = params[:draft] || false
         # @post.topics_id = topic.id 
         topic = Topic.find_or_create_by(topic_name: topic_name)
         # puts "Created Topic: #{topic.inspect}"
@@ -71,17 +88,28 @@ class PostsController < ApplicationController
           render json: { errors: @post.errors.full_messages }, status: :unprocessable_entity
         end
       end
-    
+      
+      
       def update
         @post = current_user.posts.find(params[:id])
     
         if @post.update(post_partial_params)
+          @post.update(draft: params[:draft])
           render json: @post
         else
           render json: { error: @post.errors.full_messages }, status: :unprocessable_entity
         end
       end
     
+      def publish
+        @post = Post.find(params[:id])
+        if @post.update(draft: false)
+          render json: { message: 'Draft published successfully' }, status: :ok
+        else
+          render json: { errors: @post.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+      
       def destroy
         @post = current_user.posts.find(params[:id])
         @post.destroy
@@ -91,11 +119,11 @@ class PostsController < ApplicationController
       private
     
       def post_params
-        params.require(:post).permit(:title, :topic, :post_text, :views)
+        params.require(:post).permit(:title, :topic, :post_text, :views, :drafts)
       end
 
       def post_partial_params
-        params.require(:post).permit(:title, :topic, :text)
+        params.require(:post).permit(:title, :topic, :text, :drafts)
       end
     # def new
 
