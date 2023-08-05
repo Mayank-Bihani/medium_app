@@ -36,7 +36,9 @@ class PostsController < ApplicationController
         word_count = post.post_text.split.size
         wpm = 200 # average reading speed
         minutes = (word_count / wpm).ceil
-        minutes
+        return minutes
+      else
+        return '0'
       end
     end
 
@@ -109,7 +111,7 @@ class PostsController < ApplicationController
           render json: { errors: @post.errors.full_messages }, status: :unprocessable_entity
         end
       end
-      
+
       def destroy
         @post = current_user.posts.find(params[:id])
         @post.destroy
